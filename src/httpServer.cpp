@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <BLEDevice.h>
 #include <WebServer.h>
+#include <WiFi.h>
 #include <esp_mac.h>
 
 #include "Adafruit_BME280.h"
@@ -96,6 +97,11 @@ void handleObservationResult() {
       json += "{\"type\":\"co2\",";
       json += "\"value\":" + String(co2sensor.getPPM()) + ",";
       json += "\"unit\":\"ppm\",";
+      json += "\"precision\":0},";
+
+      json += "{\"type\":\"rssi\",";
+      json += "\"value\":" + String(WiFi.RSSI()) + ",";
+      json += "\"unit\":\"dBm\",";
       json += "\"precision\":0}";
     }
     json += "]";
