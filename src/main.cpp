@@ -4,6 +4,7 @@
 #include <WebServer.h>
 #include <WiFi.h>
 #include <Wire.h>
+#include <esp_task_wdt.h>
 
 #include "Adafruit_BME280.h"
 #include "advertisedDeviceCallbacks.h"
@@ -22,7 +23,7 @@ const IPAddress dns2(WIFI_DNS2);
 extern WebServer server;
 MH_Z19C_PWM<12> co2sensor;
 Adafruit_BME280 bme;
-BLEScan* pBLEScan;
+BLEScan *pBLEScan;
 std::map<BLEAddress, ObservationResult> observationResults;
 uint32_t observationSequenceNumber = 0;
 
@@ -61,6 +62,11 @@ void setup() {
   pBLEScan->setActiveScan(true);
   pBLEScan->setInterval(BLE_SCAN_INTERVAL);
   pBLEScan->setWindow(BLE_SCAN_WINDOW);
+
+  esp_task_wdt_init(10, true);  // enable panic so ESP32 restarts, interrupt when task executed for more than 3 secons
+  esp_task_wdt_add(NULL);       // add current thread to WDT watch
+
+  Serial.println("Ready.");
 }
 
 void loop() {
@@ -81,6 +87,7 @@ void loop() {
 
   for (size_t t = 0; t < 300; t++) {
     server.handleClient();
+    esp_task_wdt_reset();
     delay(100);
   }
 }
